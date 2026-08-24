@@ -1,0 +1,35 @@
+# Virtual Environment
+env_data_analysis/
+venv/
+.env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+*.tmp
+
+# Sensitive Files
+*.key
+*.pem
+*.crt
+config.py
+secrets.py
+postgre_connection_test_db.py
