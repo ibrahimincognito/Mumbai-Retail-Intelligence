@@ -1,17 +1,22 @@
+import os
 import requests
 import pandas as pd
 import time
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
 # =====================================================
-# YOUR FOURSQUARE API KEY
+# LOAD SECRETS FROM .env FILE
 # =====================================================
-FOURSQUARE_API_KEY = "3WNTKXRN2OF1PT5SCJKY2GSAKUFEXWIA1WXVPGUXFJGDYB1W"  # Your Service API Key
+load_dotenv()
 
-# =====================================================
-# POSTGRESQL CONNECTION (port 5433)
-# =====================================================
-DB_PASSWORD = "IBK9211"
+FOURSQUARE_API_KEY = os.getenv("FOURSQUARE_API_KEY")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+if not FOURSQUARE_API_KEY:
+    raise ValueError("FOURSQUARE_API_KEY not set in .env file")
+if not DB_PASSWORD:
+    raise ValueError("DB_PASSWORD not set in .env file")
 
 # =====================================================
 # 30+ MUMBAI LOCATIONS
@@ -65,18 +70,17 @@ categories = {
 }
 
 # =====================================================
-# SEARCH VENUES FUNCTION (UPDATED)
+# SEARCH VENUES FUNCTION
 # =====================================================
 def search_venues(lat, lng, category_id, radius=500, limit=50):
-    # --- NEW CORRECT ENDPOINT ---
-    url = "https://places-api.foursquare.com/places/search"  # No /v3/ in the path[reference:2]
-    
+    url = "https://places-api.foursquare.com/places/search"
+
     headers = {
         "Accept": "application/json",
-        "Authorization": f"Bearer {FOURSQUARE_API_KEY}",  # Service Key as Bearer token[reference:3]
-        "X-Places-Api-Version": "2025-06-17"  # Required version header[reference:4]
+        "Authorization": f"Bearer {FOURSQUARE_API_KEY}",
+        "X-Places-Api-Version": "2025-06-17"
     }
-    
+
     params = {
         "ll": f"{lat},{lng}",
         "radius": radius,
@@ -84,45 +88,49 @@ def search_venues(lat, lng, category_id, radius=500, limit=50):
         "limit": limit,
         "sort": "distance"
     }
-    
+
     try:
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         data = response.json()
         return data.get("results", [])
     except requests.exceptions.RequestException as e:
-        print(f"   ⚠️ Error: {e}")
+        print(f"   WARNING: {e}")
         return []
 
 # =====================================================
 # COLLECT DATA
 # =====================================================
 print("=" * 60)
-print("🚀 STARTING FOURSQUARE DATA COLLECTION (NEW API)")
-print(f"📍 Locations: {len(locations)}")
-print(f"🏷️  Categories: {len(categories)}")
-print("⏱️  Estimated time: ~5-7 minutes")
+print("FOURSQUARE DATA COLLECTION")
+print(f"Locations: {len(locations)}")
+print(f"Categories: {len(categories)}")
+print("Estimated time: ~5-7 minutes")
 print("=" * 60)
 
 all_counts = []
 all_venues = []
 
 for idx, loc in enumerate(locations):
-    print(f"\n📍 Processing {loc['name']} ({idx+1}/{len(locations)})...")
-    
-    row = {"location_name": loc["name"], "latitude": loc["lat"], "longitude": loc["lng"]}
-    
+    print(f"\nProcessing {loc['name']} ({idx+1}/{len(locations)})...")
+
+    row = {
+        "location_name": loc["name"],
+        "latitude": loc["lat"],
+        "longitude": loc["lng"]
+    }
+
     for cat_name, cat_id in categories.items():
         venues = search_venues(loc["lat"], loc["lng"], cat_id)
         count = len(venues)
         row[cat_name] = count
-        
+
         if cat_name == "cafe":
             for venue in venues:
                 geocodes = venue.get("geocodes", {}).get("main", {})
                 location = venue.get("location", {})
                 stats = venue.get("stats", {})
-                
+
                 all_venues.append({
                     "name": venue.get("name", ""),
                     "address": location.get("formatted_address", ""),
@@ -133,14 +141,14 @@ for idx, loc in enumerate(locations):
                     "location_name": loc["name"],
                     "fsq_id": venue.get("fsq_id", "")
                 })
-        
+
         print(f"   {cat_name}: {count}")
         time.sleep(0.15)
-    
+
     all_counts.append(row)
 
-print(f"\n✅ Collected counts for {len(all_counts)} locations")
-print(f"✅ Collected {len(all_venues)} cafe competitors")
+print(f"\nCollected counts for {len(all_counts)} locations")
+print(f"Collected {len(all_venues)} cafe competitors")
 
 # =====================================================
 # SAVE TO CSV
@@ -148,12 +156,12 @@ print(f"✅ Collected {len(all_venues)} cafe competitors")
 df_counts = pd.DataFrame(all_counts)
 df_venues = pd.DataFrame(all_venues)
 
-df_counts.to_csv("location_counts_foursquare.csv", index=False)
-df_venues.to_csv("competitors_foursquare.csv", index=False)
+df_counts.to_csv("data/location_counts_foursquare.csv", index=False)
+df_venues.to_csv("data/competitors_foursquare.csv", index=False)
 
-print("\n💾 Saved to CSV files:")
-print(f"   - location_counts_foursquare.csv ({len(df_counts)} rows)")
-print(f"   - competitors_foursquare.csv ({len(df_venues)} rows)")
+print("\nSaved to CSV files:")
+print(f"   - data/location_counts_foursquare.csv ({len(df_counts)} rows)")
+print(f"   - data/competitors_foursquare.csv ({len(df_venues)} rows)")
 
 # =====================================================
 # LOAD TO POSTGRESQL
@@ -161,17 +169,17 @@ print(f"   - competitors_foursquare.csv ({len(df_venues)} rows)")
 try:
     connection_string = f"postgresql://postgres:{DB_PASSWORD}@localhost:5433/site_selection"
     engine = create_engine(connection_string)
-    
-    df_counts.to_sql("location_counts", engine, if_exists="replace", index=False)
-    df_venues.to_sql("competitors", engine, if_exists="replace", index=False)
-    
-    print("\n✅ Data loaded into PostgreSQL (port 5433)")
-    print(f"   - location_counts: {len(df_counts)} rows")
-    print(f"   - competitors: {len(df_venues)} rows")
+
+    df_counts.to_sql("mumbai_location_analysis", engine, if_exists="replace", index=False)
+    df_venues.to_sql("mumbai_cafe_competitors", engine, if_exists="replace", index=False)
+
+    print("\nData loaded into PostgreSQL (port 5433)")
+    print(f"   - mumbai_location_analysis: {len(df_counts)} rows")
+    print(f"   - mumbai_cafe_competitors: {len(df_venues)} rows")
 except Exception as e:
-    print(f"\n❌ PostgreSQL connection error: {e}")
-    print("   But CSV files are saved—import them manually if needed.")
+    print(f"\nERROR connecting to PostgreSQL: {e}")
+    print("   But CSV files are saved.")
 
 print("\n" + "=" * 60)
-print("🎉 DATA COLLECTION COMPLETE!")
+print("DATA COLLECTION COMPLETE")
 print("=" * 60)

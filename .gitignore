@@ -2,6 +2,7 @@
 env_data_analysis/
 venv/
 .env/
+.env
 
 # Python
 __pycache__/
