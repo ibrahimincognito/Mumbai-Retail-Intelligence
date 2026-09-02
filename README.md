@@ -1,47 +1,50 @@
-# Retail Intelligence Engine: Data-Driven Store Location Analytics for Mumbai
+# Mumbai Retail Intelligence Engine: Data-Driven Store Location Analytics for Mumbai
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![PostGIS](https://img.shields.io/badge/PostGIS-3.4%2B-636363?logo=postgresql&logoColor=white)](https://postgis.net/)
 [![Power BI](https://img.shields.io/badge/Power%20BI-Desktop-F2C811?logo=powerbi&logoColor=111111)](https://powerbi.microsoft.com/)
-[![License](https://img.shields.io/badge/License-MIT-2EA44F.svg)](LICENSE)
 
-> A complete retail site-selection analytics solution that combines location intelligence, spatial analysis, SQL ranking, financial modeling, and Power BI visualization to identify promising store locations across Mumbai.
+> This project is an end-to-end retail site-selection analytics solution that showcases Python ETL, Foursquare API integration, PostgreSQL with PostGIS, advanced SQL (Window Functions, CTEs), Excel financial modeling, and an interactive Power BI dashboard — analyzing 21 Mumbai locations to identify **high-potential retail sites**.
+
+## Project Background
+
+This project was built as a portfolio project to demonstrate end-to-end data analytics skills. It was inspired by real-world retail expansion challenges faced by chains entering new markets. The workflow is designed to be modular and adaptable to other cities or retail categories.
 
 ---
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Business Problem](#business-problem)
-- [Solution at a Glance](#solution-at-a-glance)
-- [Key Project Metrics](#key-project-metrics)
-- [Methodology](#methodology)
-  - [1. Data Collection](#1-data-collection--python--foursquare-api)
-  - [2. Database & Spatial Analysis](#2-database--spatial-analysis--postgresql--postgis)
-  - [3. Financial Modeling](#3-financial-modeling--excel)
-  - [4. Dashboard & Visualization](#4-dashboard--visualization--power-bi)
-- [Technology Stack](#technology-stack)
-- [Repository Structure](#repository-structure)
-- [Locations Analyzed](#locations-analyzed)
-- [Scoring Model](#scoring-model)
-- [Key Findings](#key-findings)
-- [Dashboard Previews](#dashboard-previews)
-- [How to Run the Project](#how-to-run-the-project)
-  - [Prerequisites](#prerequisites)
-  - [1. Create the PostgreSQL Database](#1-create-the-postgresql-database)
-  - [2. Install Python Dependencies](#2-install-python-dependencies)
-  - [3. Configure Environment Variables](#3-configure-environment-variables)
-  - [4. Run the Data Pipeline](#4-run-the-data-pipeline)
-  - [5. Execute SQL Analysis](#5-execute-sql-analysis)
-  - [6. Explore the Excel Financial Model](#6-explore-the-excel-financial-model)
-  - [7. Open the Power BI Dashboard](#7-open-the-power-bi-dashboard)
-- [SQL Analysis Highlights](#sql-analysis-highlights)
-- [Excel Financial Model](#excel-financial-model)
-- [Power BI Dashboard](#power-bi-dashboard)
-- [Future Improvements](#future-improvements)
-- [Connect](#connect)
-- [License](#license)
+1. [Project Overview](#project-overview)
+2. [Business Problem](#business-problem)
+3. [Solution at a Glance](#solution-at-a-glance)
+4. [Key Project Metrics](#key-project-metrics)
+5. [Methodology](#methodology)
+    - 5.1. [Data Collection — Python + Foursquare API](#1-data-collection--python--foursquare-api)
+    - 5.2. [Database & Spatial Analysis — PostgreSQL + PostGIS](#2-database--spatial-analysis--postgresql--postgis)
+    - 5.3. [Financial Modeling — Excel](#3-financial-modeling--excel)
+    - 5.4. [Dashboard & Visualization — Power BI](#4-dashboard--visualization--power-bi)
+6. [Technology Stack](#technology-stack)
+7. [Repository Structure](#repository-structure)
+8. [Locations Analyzed](#locations-analyzed)
+9. [Scoring Model](#scoring-model)
+10. [Key Findings](#key-findings)
+11. [Dashboard Previews](#dashboard-previews)
+12. [How to Run the Project](#how-to-run-the-project)
+    - 12.1. [Prerequisites](#prerequisites)
+    - 12.2. [Create the PostgreSQL Database](#1-create-the-postgresql-database)
+    - 12.3. [Install Python Dependencies](#2-install-python-dependencies)
+    - 12.4. [Configure Environment Variables](#3-configure-environment-variables)
+    - 12.5. [Run the Data Pipeline](#4-run-the-data-pipeline)
+    - 12.6. [Execute SQL Analysis](#5-execute-sql-analysis)
+    - 12.7. [Explore the Excel Financial Model](#6-explore-the-excel-financial-model)
+    - 12.8. [Open the Power BI Dashboard](#7-open-the-power-bi-dashboard)
+13. [SQL Analysis Highlights](#sql-analysis-highlights)
+14. [Excel Financial Model](#excel-financial-model)
+15. [Power BI Dashboard](#power-bi-dashboard)
+16. [Future Improvements](#future-improvements)
+17. [Acknowledgments](#acknowledgments)
+18. [Connect](#connect)
 
 ---
 
@@ -54,34 +57,13 @@ The **Retail Intelligence Engine** is an end-to-end analytics project designed t
 The project combines external place data, relational and spatial database analysis, financial modeling, and interactive business intelligence into a single decision-support workflow.
 
 ### End-to-End Workflow
+<p>
+<img src="screenshots/workflow_diagram.png" width="600">
+</p>
 
-```text
-Foursquare Places API
-        │
-        ▼
-   Python ETL
-        │
-        ├── CSV extracts
-        │
-        ▼
-PostgreSQL + PostGIS
-        │
-        ├── Spatial analysis
-        ├── CTEs
-        ├── Window functions
-        └── Location scoring
-        │
-        ├───────────────┐
-        ▼               ▼
- Excel Financial     Power BI
-     Model           Dashboard
-        │               │
-        └───────┬───────┘
-                ▼
-     Location Recommendations
-```
+---
 
-### What the project demonstrates
+## What the project demonstrates
 
 - **Data acquisition:** Collecting place intelligence from the Foursquare API.
 - **ETL:** Cleaning, transforming, and loading location data with Python.
@@ -176,7 +158,11 @@ The resulting datasets are written to `data/` and loaded into PostgreSQL for ana
 
 ### 2. Database & Spatial Analysis — PostgreSQL + PostGIS
 
-The database layer is designed around a **star-schema-oriented analytical structure** and uses PostGIS for geospatial operations.
+The database layer is designed around a **star-schema-oriented analytical structure** and uses PostGIS for geospatial operations. PostGIS is a spatial extension for PostgreSQL that turns your regular database into a geographic information system (GIS).
+
+### PostGIS Note
+
+While PostGIS was installed and enabled as the spatial backend, the current analysis uses latitude/longitude as standard coordinates without leveraging advanced spatial functions. This was a deliberate scope decision to focus on category-based scoring. Future versions can incorporate spatial queries for distance-based competitor density, catchment area analysis, and cluster detection.
 
 The SQL analysis layer contains **6 analytical queries**, including location scoring, rankings, competitor density, and market-gap analysis.
 
@@ -270,7 +256,28 @@ The project evaluates 21 Mumbai locations:
 
 ## Scoring Model
 
-The project combines positive market signals with a competition penalty to produce a weighted location score.
+The project combines positive market signals with a competition penalty to produce a weighted location score. We use a weighted scoring formula to evaluate each location's commercial potential. The weights shown below are for **demonstration purposes** to illustrate the methodology. The weighting system can be fine-tuned by adjusting weights based on empirical demand data, customer surveys, or store performance history.
+
+**Positive factors (foot traffic drivers):**
+
+| Category | Weight | Rationale |
+|----------|--------|-----------|
+| Restaurant | 0.8 | Strongest foot traffic driver (lunch/dinner crowds) |
+| Shopping Mall | 0.7 | Large concentrated shopper traffic |
+| Office | 0.6 | Consistent weekday traffic from employees |
+| Tourist Attraction | 0.6 | Strong weekend/visitor traffic |
+| Park | 0.5 | Recreational traffic (weekends, after-work) |
+| Gym | 0.4 | Niche but consistent traffic |
+| Bank | 0.3 | Limited transactional traffic |
+| Hospital | 0.3 | Focused visitor traffic |
+| School | 0.3 | Focused traffic (parents, students) |
+
+**Negative factors (competition penalties):**
+
+| Category | Weight | Rationale |
+|----------|--------|-----------|
+| Cafe | -0.8 | Direct competitor penalty |
+| Bar | -0.3 | Partial competitor penalty |
 
 ### Weighted scoring formula
 
@@ -340,9 +347,9 @@ The project includes three Power BI report pages. Preview images are stored in [
 
 | Page | Description | Preview |
 |---|---|---|
-| **Executive Summary** | KPI cards, Top 10 locations by score, and the full location table | [Open image](screenshots/Page 1: summary_page.png) |
-| **Market Intelligence** | Geospatial map, traffic-vs-competition scatter plot, pie/donut charts, and treemap | [Open image](screenshots/Page 2: market_intelligence_page.png) |
-| **Final Recommendations** | Top 5 locations, profit contribution, recommendation metrics, and gauge | [Open image](screenshots/Page 3: recommendations_page.png) |
+| **Executive Summary** | KPI cards, Top 10 locations by score, and the full location table | [Open Image](screenshots/page_1_summary_dashboard.png) |
+| **Market Intelligence** | Geospatial map, traffic-vs-competition scatter plot, pie/donut charts, and treemap | [Open Image](screenshots/page_2_market_intelligence.png) |
+| **Final Recommendations** | Top 5 locations, profit contribution, recommendation metrics, and gauge | [Open Image](screenshots/page_3_recommendations.png) |
 
 
 ---
@@ -694,8 +701,15 @@ Designed to answer the ultimate business question: **which locations should be p
 ---
 
 
-## Project Notes
+## Acknowledgments
 
-- The project is intended as a **retail location analytics and decision-support case study**.
-- The financial results are based on the documented business assumptions and should be treated as modeled estimates rather than audited financial forecasts.
-- External API availability, returned place coverage, PostgreSQL configuration, and Power BI data-source settings may affect reproducibility.
+**Foursquare Places API** — Provided the location intelligence data that powered the entire analysis, enabling collection of place counts and competitor information across 21 Mumbai neighborhoods.
+
+**PostgreSQL with PostGIS** — Served as the analytical database, with PostGIS providing spatial capabilities for storing and querying geographic location data.
+
+**Microsoft Power BI** — Enabled the creation of interactive dashboards with geospatial mapping, dynamic filtering, and drill-through capabilities for location-level analysis.
+
+**Microsoft Excel** — Powered the financial modeling layer, including revenue projections, sensitivity analysis, and break-even calculations using Power Query and Data Tables.
+
+**Open-Source Community** — The Python ecosystem and PostgreSQL documentation provided invaluable guidance throughout the development process.
+
